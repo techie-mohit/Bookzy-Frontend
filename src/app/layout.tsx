@@ -1,7 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
-
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import LayoutWrapper from "./LayoutWrapper";
 
 
 const robotoMono = Roboto_Mono({
@@ -11,20 +14,22 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: "Bookzy",
-  description: "this is ecommerce platform where you can sell  or buy used books online",
+  description: "This is an ecommerce platform where you can sell or buy used books online",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={robotoMono.className}
-      >
-        {children}
+      <body className={robotoMono.className}>
+        <LayoutWrapper>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+        </LayoutWrapper>
       </body>
     </html>
   );
