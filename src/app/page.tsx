@@ -3,13 +3,11 @@
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
-  Book,
   BookAIcon,
   BookOpen,
   Camera,
   CreditCard,
   Library,
-  Notebook,
   Search,
   ShoppingBag,
   Store,
@@ -115,6 +113,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
+
+      {/* Banner Section */}
       <section className="relative h-[600px] overflow-hidden">
         {bannerImages.map((image, index) => (
           <div
@@ -176,7 +176,12 @@ export default function Home() {
         </div>
       </section>
 
+
+      {/* Newly Added Books */}
       <NewBooks />
+
+
+      {/* Explore Books */}
       <Button
         size="lg"
         className="flex mt-10 mb-10 mx-auto bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-600 hover:to-yellow-700 text-white px-8 py-6 rounded-xl"
@@ -214,6 +219,7 @@ export default function Home() {
 
       </section>
 
+
       {/* How to buy old books online */}
        <section className="py-16 bg-gradient-to-r from-gray-100 to-gray-200">
         <div className="container max-w-screen-xl mx-auto px-5">
@@ -240,6 +246,8 @@ export default function Home() {
         </div>
 
       </section>
+
+
 
       {/* Blog Post */}
       <section className="py-16 bg-[rgb(221,234,254)]">
@@ -275,6 +283,8 @@ export default function Home() {
         </div>
 
       </section>
+
+      
     </main>
   );
 }
