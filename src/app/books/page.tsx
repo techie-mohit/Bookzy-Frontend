@@ -26,6 +26,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import Pagination from "../components/Pagination";
+import NoData from "../components/NoData";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,6 +35,8 @@ const Page = () => {
   const [selectedCondition, setSelectedCondition] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("newest");
+
+  const router = useRouter();
 
   const bookPerPage = 6; // Number of books to display per page
 
@@ -99,6 +103,7 @@ const Page = () => {
   });
 
   const totalPage = Math.ceil(sortedBooks.length / bookPerPage);
+  
   const paginatedBooks = sortedBooks.slice(
     (currentPage - 1) * bookPerPage,
     currentPage * bookPerPage
@@ -298,7 +303,13 @@ const Page = () => {
                 />
               </>
             ) : (
-              false
+              <NoData
+                imageUrl="/images/no-book.jpg"
+                message="No books available please try later."
+                description="Try adjusting your filters or search criteria to find what you're looking for."
+                onClick={() => router.push("/book-sell")}
+                buttonText="Shell Your First Book"
+              />
             )}
           </div>
         </div>
