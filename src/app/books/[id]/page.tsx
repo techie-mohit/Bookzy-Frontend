@@ -77,7 +77,7 @@ const page = () => {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div className="relative h-[400px] w-full overflow-hidden rounded-lg border bg-white shadow-md">
               <Image
                 src={bookImage[selectedImage]}
