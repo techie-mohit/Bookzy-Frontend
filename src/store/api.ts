@@ -3,7 +3,7 @@
 // 2️⃣ fetchBaseQuery - ek built-in baseQuery function jo simple fetch request banata hai
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const API_URLS = {
 
     // user related urls 
@@ -81,7 +81,6 @@ export const api = createApi({
                 method: 'POST',
                 body: userData
             }),
-            invalidatesTags: ['User']
         }),
 
         login : builder.mutation({
@@ -90,7 +89,6 @@ export const api = createApi({
                 method: 'POST',
                 body: userData
             }),
-            invalidatesTags: ['User']
         }),
 
         verifyEmail : builder.mutation({

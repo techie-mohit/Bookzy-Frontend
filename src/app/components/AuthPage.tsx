@@ -7,12 +7,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from "@/store/api";
+import { authStatus, toggleLoginDialog } from "@/store/slice/userSlice";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
 
 interface LoginProps {
   isLoginOpen: boolean;
@@ -36,9 +40,9 @@ interface ForgotPasswordFormData {
 }
 
 const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
-  const [currentTab, setCurrentTab] = React.useState<
-    "login" | "signup" | "forgot"
-  >("login");
+
+
+  const [currentTab, setCurrentTab] = React.useState<"login" | "signup" | "forgot">("login");
   const [showPassword, setShowPassword] = React.useState(false);
   const [forgotPasswordSuccess, setForgotPasswordSuccess] =
     React.useState(false);
@@ -47,22 +51,56 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
   const [forgotLoading, setForgotLoading] = React.useState(false);
   const [googleLoading, setGoogleLoading] = React.useState(false);
 
-  const {
-    register: registerLogin,
-    handleSubmit: handleLoginSubmit,
-    formState: { errors: loginErrors },
-  } = useForm<LoginFormData>();
-  const {
-    register: registerSignup,
-    handleSubmit: handleSignupSubmit,
-    formState: { errors: signupErrors },
-  } = useForm<SignupFormData>();
-  const {
-    register: registerForgot,
-    handleSubmit: handleForgotSubmit,
-    formState: { errors: forgotErrors },
-  } = useForm<ForgotPasswordFormData>();
+  const [register] = useRegisterMutation();
+  const [login]  = useLoginMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
+  const dispatch = useDispatch();
 
+  const {
+    register: registerLogin, handleSubmit: handleLoginSubmit,  formState: { errors: loginErrors }} = useForm<LoginFormData>();
+  const {
+    register: registerSignup, handleSubmit: handleSignupSubmit,  formState: { errors: signupErrors }} = useForm<SignupFormData>();
+  const {
+    register: registerForgot,  handleSubmit: handleForgotSubmit,  formState: { errors: forgotErrors }} = useForm<ForgotPasswordFormData>();
+
+  const onSubmitSignUp = async(data: SignupFormData)=>{
+    setSignupLoading(true);
+    try {
+      const {email, password, name} = data;
+      const result = await register({email, password, name}).unwrap();
+      console.log("Registration successful:", result);
+      if(result.success){
+        toast.success("verification link send to your email successfully. please verify your email");
+        dispatch(toggleLoginDialog());
+      }      
+    } catch (error) {
+      toast.error("Registration failed. Please try again. Email Already registered");
+    }
+    finally{
+      setSignupLoading(false);
+    }
+  }
+
+  const onSubmitLogin = async(data: LoginFormData)=>{
+    setLoginLoading(true);
+    try {
+      const {email, password} = data;
+      const result = await login({email, password}).unwrap();
+      console.log("Login  successful:", result);
+      if(result.success){
+        toast.success("Login successful");
+        dispatch(toggleLoginDialog());
+        dispatch(authStatus());
+        window.location.reload();
+      }      
+    } catch (error) {
+      console.log(error);
+      toast.error("Login failed. Email or password is incorrect");
+    }
+    finally{
+      setLoginLoading(false);
+    }
+  }
   return (
     <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
       <DialogContent className="sm:max-w-[425px] p-6">
@@ -91,7 +129,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                 transition={{ duration: 0.3 }}
               >
                 <TabsContent value="login" className="space-y-4">
-                  <form className="space-y-4">
+                  <form onSubmit={handleLoginSubmit(onSubmitLogin)} className="space-y-4">
                     <div className="relative">
                       <Input
                         className="pl-12"
@@ -186,7 +224,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4">
-                  <form className="space-y-4">
+                  <form onSubmit={handleSignupSubmit(onSubmitSignUp)} className="space-y-4">
                     <div className="relative">
                       <Input
                         className="pl-12"
