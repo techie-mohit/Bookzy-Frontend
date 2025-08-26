@@ -7,12 +7,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from "@/store/api";
+import { BASE_URL, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from "@/store/api";
 import { authStatus, toggleLoginDialog } from "@/store/slice/userSlice";
+import { set } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -55,6 +57,8 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
   const [login]  = useLoginMutation();
   const [forgotPassword] = useForgotPasswordMutation();
   const dispatch = useDispatch();
+
+  const router = useRouter();
 
   const {
     register: registerLogin, handleSubmit: handleLoginSubmit,  formState: { errors: loginErrors }} = useForm<LoginFormData>();
@@ -101,6 +105,43 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
       setLoginLoading(false);
     }
   }
+
+  const handleGoogleLogin = async()=>{
+    setGoogleLoading(true);
+    try {
+      router.push(`${BASE_URL}/auth/google`)
+      dispatch(authStatus());
+      dispatch(toggleLoginDialog());
+      setTimeout(()=>{
+        toast.success('Google Login Successful')
+        setIsLoginOpen(false);
+      }, 3000)
+    } catch (error) {
+     
+      toast.error("Login with is Google Failed. please try again");
+    }
+    finally{
+      setGoogleLoading(false);
+    }
+  }
+
+    const onSubmitForgotPassword = async(data: ForgotPasswordFormData)=>{
+    setForgotLoading(true);
+    try {
+      const result = await forgotPassword({email: data.email}).unwrap();
+      if(result.success){
+        toast.success("Password reset link sent to your email successfully");
+        setForgotPasswordSuccess(true);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to send the password reset link to email. Please try again");
+    }
+    finally{
+      setForgotLoading(false);
+    }
+  }
+
   return (
     <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
       <DialogContent className="sm:max-w-[425px] p-6">
@@ -199,7 +240,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                       <div className="flex-1 h-px bg-gray-300"></div>
                     </div>
 
-                    <Button className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100">
+                    <Button  onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100">
                       {googleLoading ? (
                         <>
                           <Loader2
@@ -332,7 +373,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                 <TabsContent value="forgot" className="space-y-4">
                   {
                     !forgotPasswordSuccess ? (
-                      <form className="space-y-4">
+                      <form className="space-y-4" onSubmit={handleForgotSubmit(onSubmitForgotPassword)}>
                     <div className="relative">
                       <Input
                         className="pl-12"

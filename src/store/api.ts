@@ -3,30 +3,30 @@
 // 2️⃣ fetchBaseQuery - ek built-in baseQuery function jo simple fetch request banata hai
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const API_URLS = {
 
     // user related urls 
-    REGISTER : `${BASE_URL}/auth/register`,
-    LOGIN : `${BASE_URL}/auth/login`,
-    VERIFY_EMAIL :(token:string)=> `${BASE_URL}/auth/verify-email/${token}`,
-    FORGOT_PASSWORD : `${BASE_URL}/auth/forgot-password`,
-    RESET_PASSWORD : (token:string)=> `${BASE_URL}/auth/reset-password/${token}`,
-    VERIFY_AUTH :  `${BASE_URL}/auth/verify`,
-    LOGOUT : `${BASE_URL}/auth/logout`,
-    UPDATE_USER_PROFILE : (userId:string)=> `${BASE_URL}/user/profile/update/${userId}`,
+    REGISTER: `${BASE_URL}/auth/register`,
+    LOGIN: `${BASE_URL}/auth/login`,
+    VERIFY_EMAIL: (token: string) => `${BASE_URL}/auth/verify-email/${token}`,
+    FORGOT_PASSWORD: `${BASE_URL}/auth/forgot-password`,
+    RESET_PASSWORD: (token: string) => `${BASE_URL}/auth/reset-password/${token}`,
+    VERIFY_AUTH: `${BASE_URL}/auth/verify-auth`,
+    LOGOUT: `${BASE_URL}/auth/logout`,
+    UPDATE_USER_PROFILE: (userId: string) => `${BASE_URL}/user/profile/update/${userId}`,
 
     // product related urls
     PRODUCTS: `${BASE_URL}/products`,
-    PRODUCT_BY_ID: (id:string)=> `${BASE_URL}/products/${id}`,
-    GET_PRODUCT_BY_SELLER_ID : (sellerId:string)=> `${BASE_URL}/products/seller/${sellerId}`,
-    DELETE_PRODUCT_BY_PRODUCT_ID : (productId:string)=> `${BASE_URL}/products/${productId}`,
+    PRODUCT_BY_ID: (id: string) => `${BASE_URL}/products/${id}`,
+    GET_PRODUCT_BY_SELLER_ID: (sellerId: string) => `${BASE_URL}/products/seller/${sellerId}`,
+    DELETE_PRODUCT_BY_PRODUCT_ID: (productId: string) => `${BASE_URL}/products/${productId}`,
 
 
     // cart related urls
-    CART:(userId: string)=> `${BASE_URL}/cart/${userId}`,
+    CART: (userId: string) => `${BASE_URL}/cart/${userId}`,
     ADD_TO_CART: `${BASE_URL}/cart/add-to-cart`,
-    REMOVE_FROM_CART: (productId:string)=> `${BASE_URL}/cart/remove-from-cart/${productId}`,
+    REMOVE_FROM_CART: (productId: string) => `${BASE_URL}/cart/remove-from-cart/${productId}`,
 
 
     // wishlist related urls
@@ -38,7 +38,7 @@ const API_URLS = {
     // order related urls
     ORDERS: `${BASE_URL}/order`,
     ORDER_BY_ID: (orderId: string) => `${BASE_URL}/order/${orderId}`,
-    CREATE_RAZORPAY_PAYMENT : `${BASE_URL}/order/payment-razorpay`,
+    CREATE_RAZORPAY_PAYMENT: `${BASE_URL}/order/payment-razorpay`,
 
     // address related urls
     ADD_OR_UPDATE_ADDRESS: `${BASE_URL}/user/address/create-or-update`,
@@ -55,7 +55,7 @@ export const api = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: BASE_URL,         // Sab requests isi base URL se jayengi
         credentials: 'include',    // Cookies ko request mein bhejne ke liye
-                                   // Useful for authentication (e.g., sessions)
+        // Useful for authentication (e.g., sessions)
     }),
 
     // ✅ tagTypes:
@@ -63,62 +63,60 @@ export const api = createApi({
     // RTK Query cache invalidation ke liye tags define karta hai
     // Example mein 'User' tag define kiya hai
     // Iska use refetch/invalidating cache ke liye hota hai
-    tagTypes:['User', 'Product', 'Cart', 'Wishlist', 'Order', 'Address'],
+    tagTypes: ['User', 'Product', 'Cart', 'Wishlist', 'Order', 'Address'],
 
     // ✅ endpoints:
     // Ye function hai jo sab endpoints define karega
     // Builder pattern use karke queries aur mutations banate hain
     // Filhal ye empty hai => koi endpoint nahi define kiya
-    endpoints :(builder)=>({
+    endpoints: (builder) => ({
         // ⚠️ abhi yahan koi endpoint nahi likha
         // future mein builder.query ya builder.mutation se endpoints banayenge
 
         // USER ENDPOINTS
 
         register: builder.mutation({
-            query:(userData)=>({
+            query: (userData) => ({
                 url: API_URLS.REGISTER,
                 method: 'POST',
                 body: userData
             }),
         }),
 
-        login : builder.mutation({
-            query:(userData)=>({
-                url : API_URLS.LOGIN,
+        login: builder.mutation({
+            query: (userData) => ({
+                url: API_URLS.LOGIN,
                 method: 'POST',
                 body: userData
             }),
         }),
 
-        verifyEmail : builder.mutation({
-            query:(token)=>({
-                url : API_URLS.VERIFY_EMAIL(token),
+        verifyEmail: builder.mutation({
+            query: (token) => ({
+                url: API_URLS.VERIFY_EMAIL(token),
                 method: 'GET',
             }),
-            invalidatesTags: ['User']
         }),
 
-        forgotPassword : builder.mutation({
-            query:(email)=>({
-                url : API_URLS.FORGOT_PASSWORD,
+        forgotPassword: builder.mutation({
+            query: (userData: { email: string }) => ({
+                url: API_URLS.FORGOT_PASSWORD,
                 method: 'POST',
-                body: { email }
+                body: userData   // ✅ send as-is, not wrapped again
             }),
             invalidatesTags: ['User']
         }),
-
         resetPassword: builder.mutation({
-            query:({token , newPassword})=>({
+            query: ({ token, newPassword }) => ({
                 url: API_URLS.RESET_PASSWORD(token),
                 method: 'POST',
-                body: {newPassword }
+                body: { newPassword }
             }),
             invalidatesTags: ['User']
         }),
 
         verifyAuth: builder.mutation({
-            query:()=>({
+            query: () => ({
                 url: API_URLS.VERIFY_AUTH,
                 method: 'GET',
             }),
@@ -126,7 +124,7 @@ export const api = createApi({
         }),
 
         logout: builder.mutation({
-            query:()=>({
+            query: () => ({
                 url: API_URLS.LOGOUT,
                 method: 'GET',
             }),
@@ -134,7 +132,7 @@ export const api = createApi({
         }),
 
         updateUser: builder.mutation({
-            query: ({userId , userData}) => ({
+            query: ({ userId, userData }) => ({
                 url: API_URLS.UPDATE_USER_PROFILE(userId),
                 method: 'PUT',
                 body: userData
@@ -148,7 +146,7 @@ export const api = createApi({
         // Product Endpoints
 
         addProducts: builder.mutation({
-            query: (productData)=>({
+            query: (productData) => ({
                 url: API_URLS.PRODUCTS,
                 method: 'POST',
                 body: productData
@@ -157,22 +155,22 @@ export const api = createApi({
         }),
 
         getProducts: builder.query({
-            query: ()=> API_URLS.PRODUCTS,
+            query: () => API_URLS.PRODUCTS,
             providesTags: ['Product']
         }),
 
         getProductById: builder.query({
-            query: (id)=> API_URLS.PRODUCT_BY_ID(id),
+            query: (id) => API_URLS.PRODUCT_BY_ID(id),
             providesTags: ['Product']
         }),
 
         getProductBySellerId: builder.query({
-            query: (sellerId)=> API_URLS.GET_PRODUCT_BY_SELLER_ID(sellerId),
+            query: (sellerId) => API_URLS.GET_PRODUCT_BY_SELLER_ID(sellerId),
             providesTags: ['Product']
         }),
 
         deleteProductById: builder.mutation({
-            query: (productId)=> ({
+            query: (productId) => ({
                 url: API_URLS.DELETE_PRODUCT_BY_PRODUCT_ID(productId),
                 method: 'DELETE',
             }),
@@ -182,49 +180,49 @@ export const api = createApi({
 
 
         // Cart Endpoints
-        addToCart : builder.mutation({
-            query:(productData)=>({
-                url : API_URLS.ADD_TO_CART,
+        addToCart: builder.mutation({
+            query: (productData) => ({
+                url: API_URLS.ADD_TO_CART,
                 method: 'POST',
                 body: productData
             }),
             invalidatesTags: ['Cart']
         }),
 
-        removeFromCart : builder.mutation({
-            query:(productId)=>({
-                url : API_URLS.REMOVE_FROM_CART(productId),
+        removeFromCart: builder.mutation({
+            query: (productId) => ({
+                url: API_URLS.REMOVE_FROM_CART(productId),
                 method: 'DELETE',
             }),
             invalidatesTags: ['Cart']
         }),
 
-        getCart : builder.query({
-            query: (userId)=> API_URLS.CART(userId),
+        getCart: builder.query({
+            query: (userId) => API_URLS.CART(userId),
             providesTags: ['Cart']
         }),
 
 
         // Wishlist Endpoints
-        addToWishlist : builder.mutation({
-            query:(productId)=>({
-                url : API_URLS.ADD_TO_WISHLIST,
+        addToWishlist: builder.mutation({
+            query: (productId) => ({
+                url: API_URLS.ADD_TO_WISHLIST,
                 method: 'POST',
                 body: { productId }
             }),
             invalidatesTags: ['Wishlist']
         }),
 
-        removeFromWishlist : builder.mutation({
-            query:(productId)=>({
-                url : API_URLS.REMOVE_FROM_WISHLIST(productId),
+        removeFromWishlist: builder.mutation({
+            query: (productId) => ({
+                url: API_URLS.REMOVE_FROM_WISHLIST(productId),
                 method: 'DELETE',
             }),
             invalidatesTags: ['Wishlist']
         }),
 
-        getWishlist : builder.query({
-            query: (userId)=> API_URLS.WISHLIST(userId),
+        getWishlist: builder.query({
+            query: (userId) => API_URLS.WISHLIST(userId),
             providesTags: ['Wishlist']
         }),
 
@@ -242,18 +240,18 @@ export const api = createApi({
         }),
 
         createOrUpdateOrder: builder.mutation({
-            query:({orderId, orderData})=>({
-                url : API_URLS.ORDERS,
+            query: ({ orderId, orderData }) => ({
+                url: API_URLS.ORDERS,
                 method: orderId ? 'PATCH' : 'POST',
                 body: orderData
             }),
             invalidatesTags: ['Order']
-        }),  
+        }),
 
 
-        createRazorpayPayment : builder.mutation({
-            query:(orderId)=>({
-                url : API_URLS.CREATE_RAZORPAY_PAYMENT,
+        createRazorpayPayment: builder.mutation({
+            query: (orderId) => ({
+                url: API_URLS.CREATE_RAZORPAY_PAYMENT,
                 method: 'POST',
                 body: { orderId }
             }),
@@ -264,12 +262,12 @@ export const api = createApi({
 
         // Address Endpoints
 
-        getAddress : builder.query({
-            query:()=> API_URLS.GET_ADDRESS,
+        getAddress: builder.query({
+            query: () => API_URLS.GET_ADDRESS,
             providesTags: ['Address']
         }),
 
-        addOrUpdateAddress : builder.mutation({
+        addOrUpdateAddress: builder.mutation({
             query: (addressData) => ({
                 url: API_URLS.ADD_OR_UPDATE_ADDRESS,
                 method: 'POST',
