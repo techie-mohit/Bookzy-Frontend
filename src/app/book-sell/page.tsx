@@ -2,12 +2,14 @@
 
 import { BookDetails } from '@/lib/types/type';
 import { useAddProductsMutation } from '@/store/api';
+import { toggleLoginDialog } from '@/store/slice/userSlice';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
+import NoData from '../components/NoData';
 
 const page = () => {
 
@@ -73,6 +75,21 @@ const page = () => {
         }
     }
 
+    const paymentMode = watch('paymentMode');
+    const handleOpenLogin = ()=>{
+        dispatch(toggleLoginDialog());
+    }
+     if (!user) {
+    return (
+      <NoData
+        message="Please log in to access your cart."
+        description="You need to be logged in to view your cart and checkout."
+        buttonText="Login"
+        imageUrl="/images/login.jpg"
+        onClick={handleOpenLogin}
+      />
+    );
+  }
 
   return (
     <div>
