@@ -17,6 +17,7 @@ import {
   ChevronRight,
   DollarSign,
   HelpCircle,
+  Loader2,
   X,
 } from "lucide-react";
 import {
@@ -50,7 +51,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const page = () => {
   const [uploadImages, setUploadImages] = useState<string[]>([]);
-  const [addProducts] = useAddProductsMutation();
+  const [addProducts, {isLoading}] = useAddProductsMutation();
   const dispatch = useDispatch();
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
@@ -168,9 +169,9 @@ const page = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Book Details */}
-          <Card className="shadow-lg border-t-4 border-t-blue-500">
-            <CardHeader className="bg-gradient-to-r from-blue-50 py-4  to-indigo-50 ">
-              <CardTitle className="text-2xl text-blue-700 flex items-center  ">
+          <Card className="shadow-lg border-t-4 border-t-cyan-500">
+            <CardHeader className="bg-gradient-to-r from-cyan-100 py-4  to-cyan-50 ">
+              <CardTitle className="text-2xl text-cyan-700 flex items-center  ">
                 <Book className="mr-2 h-6 w-6" />
                 Book Details
               </CardTitle>
@@ -348,12 +349,12 @@ const page = () => {
                 <Label className="block mb-2 font-medium text-gray-700">
                   Upload Photos
                 </Label>
-                <div className="border-2 boder-dashed border-blue-300 rounded-lg p-4 bg-blue-50">
+                <div className="border-2 boder-dashed border-cyan-300 rounded-lg p-4 bg-cyan-50">
                   <div className="flex flex-col items-center gap-2">
-                    <Camera className="h-8 w-8 text-blue-400" />
+                    <Camera className="h-8 w-8 text-cyan-400" />
                     <Label
                       htmlFor="images"
-                      className="cursor-pointer text-sm font-medium text-blue-700 hover:underline"
+                      className="cursor-pointer text-sm font-medium text-cyan-700 hover:underline"
                     >
                       click here to upload up to 4 images(size: 15MB max. each)
                     </Label>
@@ -591,6 +592,195 @@ const page = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Bank Details */}
+          <Card className="shadow-lg border-t-4 border-t-violet-500">
+            <CardHeader className="bg-gradient-to-r from-violet-100 py-4  to-indigo-50 ">
+              <CardTitle className="text-2xl text-violet-700 flex items-center  ">
+                <Book className="mr-2 h-6 w-6" />
+                Bank Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              
+
+              <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <Label
+                  className="md:w-1/4 font-medium text-gray-700"
+                >
+                  Payment Mode
+                </Label>
+                <div className="space-y-2 md:w-3/4">
+                <p className="text-sm text-muted-foreground mb-2">After your book is sold , in what mode would you like to receive the payment?</p>
+                  <Controller
+                    name="paymentMode"
+                    control={control}
+                    rules={{ required: "Payment Mode is required" }}
+                    render={({ field }) => (
+                      <RadioGroup onValueChange={field.onChange} value={field.value} className="flex space-x-4">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="UPI" id="UPI" {...register('paymentMode')} />
+                          <Label htmlFor="UPI">UPI Id / Number</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Bank Account" id="bank account" {...register('paymentMode')} />
+                          <Label htmlFor="bank account">Bank Account</Label>
+                        </div>
+
+                      </RadioGroup>
+                    )}
+                  />
+
+                  {errors.paymentMode && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.paymentMode.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {
+                paymentMode === 'UPI' && (
+                  <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <Label
+                  htmlFor="upiId"
+                  className="md:w-1/4 font-medium text-gray-700"
+                >
+                  UPI ID
+                </Label>
+                <div className="md:w-3/4">
+                  <Input
+                    {...register("paymentDetails.upiId", {
+                      required: "UPI ID is required",
+                      pattern: {
+                        value: /[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}/,
+                        message: "Invalid UPI ID format"
+                      }
+                    })}
+                    placeholder="Enter your UPI ID"
+                    type="text"
+                    className="pl-4"
+                  />
+                  {errors.paymentDetails?.upiId && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.paymentDetails.upiId.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+
+                )}
+
+                {
+                  paymentMode === 'Bank Account' && (
+                   <>
+                    <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <Label
+                  htmlFor="accountNumber"
+                  className="md:w-1/4 font-medium text-gray-700"
+                >
+                  Account Number
+                </Label>
+                <div className="md:w-3/4">
+                  <Input
+                    {...register("paymentDetails.bankDetails.accountNumber", {
+                      required: "Account Number is required",
+                      pattern: {
+                        value: /^[0-9]{9,18}$/,
+                        message: "Invalid Account Number format"
+                      }
+                    })}
+                    placeholder="Enter your Account Number"
+                    type="text"
+                    className="pl-4"
+                  />
+                  {errors.paymentDetails?.bankDetails?.accountNumber && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.paymentDetails.bankDetails.accountNumber.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+               <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <Label
+                  htmlFor="ifscCode"
+                  className="md:w-1/4 font-medium text-gray-700"
+                >
+                  IFSE Code
+                </Label>
+                <div className="md:w-3/4">
+                  <Input
+                    {...register("paymentDetails.bankDetails.ifscCode", {
+                      required: "IFSC Code is required",
+                      pattern: {
+                        value: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+                        message: "Invalid IFSC Code format"
+                      }
+                    })}
+                    placeholder="Enter your IFSC Code"
+                    type="text"
+                    className="pl-4"
+                  />
+                  {errors.paymentDetails?.bankDetails?.ifscCode && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.paymentDetails.bankDetails.ifscCode.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+               <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <Label
+                  htmlFor="bankName"
+                  className="md:w-1/4 font-medium text-gray-700"
+                >
+                  Bank Name
+                </Label>
+                <div className="md:w-3/4">
+                  <Input
+                    {...register("paymentDetails.bankDetails.bankName", {
+                      required: "Bank Name is required",
+                    })}
+                    placeholder="Enter your Bank Name"
+                    type="text"
+                    className="pl-4"
+                  />
+                  {errors.paymentDetails?.bankDetails?.bankName && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.paymentDetails.bankDetails.bankName.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </>
+
+                  )}
+              
+              
+            </CardContent>
+          </Card>
+
+          <Button type="submit" disabled={isLoading} className="w-60 text-md bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-orange-600 hover:to-orange-700 font-semibold py-6 shadow-lg rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+            {isLoading ? (
+              <>
+              <Loader2 className="animate-spin mr-2" size={20} />
+              Saving ...
+              </>
+            ) : ("Post Your Books")}
+          </Button>
+
+         <p className="mt-2 text-sm text-center text-gray-600">
+            By Clicking "Post Your Books", you agree to our{" "}
+            <Link href="/terms-of-use" className="text-blue-500 underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy-policy" className="text-blue-500 underline">
+              Privacy Policy
+            </Link>
+          </p>
         </form>
       </div>
     </div>
