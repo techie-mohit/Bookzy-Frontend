@@ -1,14 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { books } from "@/lib/Constant";
+import { BookDetails } from "@/lib/types/type";
+import { useGetProductByIdQuery, useGetProductsQuery } from "@/store/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { set } from "react-hook-form";
 
 const NewBooks = () => {
   const [currentBookSlide, setCurrentBookSlide] = React.useState(0);
+  const {data:apiResponse= {}, isLoading} = useGetProductsQuery({});
+   const [books, setBooks] = useState<BookDetails[]>([]);
+ 
+   useEffect(()=>{
+     if(apiResponse.success){
+       setBooks(apiResponse.data);
+     }
+   }, [apiResponse])
 
   useEffect(() => {
     const interval = setInterval(() => {

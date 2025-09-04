@@ -1,5 +1,6 @@
 "use client";
 import NoData from "@/app/components/NoData";
+import { ShareButton } from "@/app/components/Share";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -194,10 +195,11 @@ const page = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <Button variant="outline" onClick={handleAddToCart}>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  <span className="hidden md:inline">Share</span>
-                </Button>
+                <ShareButton 
+                url = {`${window.location.origin}/books/${book._id}`}
+                title = {`check out this book : ${book.title}`}
+                text={`I found this interesting book on BookKart : ${book.title}`}
+                />
                 <Button
                   onClick={() => handleAddToWhishlist(book._id)}
                   variant="outline"

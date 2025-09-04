@@ -56,11 +56,11 @@ const Page = () => {
 
 
   const togglefilter = (section: string, item: string) => {
-    const updatedFilter = (prev: string[]) => {
-      return prev.includes(item)
+    const updatedFilter = (prev: string[]) =>
+      prev.includes(item)
         ? prev.filter((i) => i != item)
         : [...prev, item];
-    };
+  
 
     switch (section) {
       case "category":
