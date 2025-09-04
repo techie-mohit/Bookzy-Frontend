@@ -26,6 +26,8 @@ import {
 // ✅ Apna user slice reducer import kiya
 // User authentication aur profile ke state ko manage karta hai
 import userReducer from "./slice/userSlice";
+import cartReducer from "./slice/cartSlice";
+import wishlistReducer from "./slice/wishlistSlice";
 
 // ✅ RTK Query API slice import kiya
 // Isme sab API endpoints aur auto-generated hooks hote hain
@@ -48,10 +50,29 @@ const userPersistConfig = {
   ]
 }
 
+const cartPersistConfig = {
+  key: 'cart',            // localStorage mein is key se save hoga
+  storage,                // Storage backend (localStorage)
+  whiteList: [            // sirf in fields ko save karna hai
+    'items'
+  ]
+}
+
+
+const wishlistPersistConfig = {
+  key: 'wishlist',
+  storage
+}
+
+
+
+
 
 // ✅ userReducer ko persistReducer ke saath wrap kiya
 // Ye user slice ko automatically localStorage mein save/rehydrate karega
 const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
+const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
+const persistedWishlistReducer = persistReducer(wishlistPersistConfig, wishlistReducer);
 
 
 // ✅ Redux Store banaya
@@ -61,7 +82,9 @@ export const store = configureStore({
     [api.reducerPath]: api.reducer,       // e.g. "api": RTK Query state
 
     // ✅ User slice with persistence
-    user: persistedUserReducer            // e.g. "user": Auth data, saved in storage
+    user: persistedUserReducer,       // e.g. "user": Auth data, saved in storage
+    cart: persistedCartReducer,       // e.g. "cart": Cart data, saved in storage
+    wishlist: persistedWishlistReducer // e.g. "wishlist": Wishlist data, saved in storage
   },
 
   // ✅ Middleware setup

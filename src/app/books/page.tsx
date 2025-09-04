@@ -7,9 +7,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { books, filters } from "@/lib/Constant";
+import { filters } from "@/lib/Constant";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import BookLoader from "@/lib/BookLoader";
 import {
@@ -28,6 +28,8 @@ import { Heart } from "lucide-react";
 import Pagination from "../components/Pagination";
 import NoData from "../components/NoData";
 import { useRouter } from "next/navigation";
+import { useGetProductsQuery } from "@/store/api";
+import { BookDetails } from "@/lib/types/type";
 
 const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +42,18 @@ const Page = () => {
 
   const bookPerPage = 6; // Number of books to display per page
 
-  const [isLoading, setIsLoading] = useState(false);
+  const {data:apiResponse= {}, isLoading} = useGetProductsQuery({});
+  const [books, setBooks] = useState<BookDetails[]>([]);
+
+  useEffect(()=>{
+    if(apiResponse.success){
+      setBooks(apiResponse.data);
+    }
+  }, [apiResponse])
+
+  console.log(books);
+
+
 
   const togglefilter = (section: string, item: string) => {
     const updatedFilter = (prev: string[]) => {
