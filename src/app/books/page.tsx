@@ -53,6 +53,8 @@ const Page = () => {
 
   console.log(books);
 
+  const searchTerms = new URLSearchParams(window.location.search).get("search") || "";
+
 
 
   const togglefilter = (section: string, item: string) => {
@@ -93,7 +95,12 @@ const Page = () => {
         .map((type) => type.toLowerCase())
         .includes(book.classType.toLowerCase());
 
-    return matchedCondition && matchedCategory && matchedType;
+    const searchMatch = searchTerms ? book.title.toLowerCase().includes(searchTerms.toLowerCase()) || 
+    book.author.toLowerCase().includes(searchTerms.toLowerCase()) || 
+    book.subject.toLowerCase().includes(searchTerms.toLowerCase()) || 
+    book.category.toLowerCase().includes(searchTerms.toLowerCase()) : true;    
+
+    return matchedCondition && matchedCategory && matchedType && searchMatch;
   });
 
   const sortedBooks = [...filterBooks].sort((a, b) => {

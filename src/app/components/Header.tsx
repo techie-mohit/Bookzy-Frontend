@@ -36,11 +36,12 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AuthPage from "./AuthPage";
-import { useLogoutMutation } from "@/store/api";
+import { useGetCartQuery, useLogoutMutation } from "@/store/api";
 import toast from "react-hot-toast";
+import { setCart } from "@/store/slice/cartSlice";
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -54,11 +55,26 @@ const Header = () => {
   const [logoutMutation] = useLogoutMutation();
   console.log(user);
   const userPlaceholder = user?.name?.split(" ").map((name:string) => name[0]).join("");
+  const cartItemCount = useSelector((state: RootState)=> state.cart.items.length);
+  const {data:cartData} = useGetCartQuery(user?._id, {skip:!user});
+
+  const [searchTerms, setSearchTerms] = useState("");
+  const handleSearch = ()=>{
+    router.push(`/books?search=${encodeURIComponent(searchTerms)}`);
+  }
+
+
 
   const handleLoginClick = () => {
     dispatch(toggleLoginDialog());
     setIsDropdownOpen(false);
   };
+
+  useEffect(()=>{
+    if(cartData?.successful && cartData?.data){
+      dispatch(setCart(cartData.data));
+    }
+  }, [cartData, dispatch]);
 
   const handleProtectionClick = (href: string) => {
     if (user) {
@@ -218,14 +234,15 @@ const Header = () => {
               type="text"
               placeholder="Search for Book Name, Author, Subject and Publisher"
               className="w-full pr-10"
-              value=""
-              onChange={() => {}}
+              value={searchTerms}
+              onChange={(e) => setSearchTerms(e.target.value)}
             />
 
             <Button
               size="icon"
               variant="ghost"
               className="absolute right-0 top-1/2 -translate-y-1/2"
+              onClick = {handleSearch}
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -267,9 +284,9 @@ const Header = () => {
                 Cart
               </Button>
 
-              {user && (
+              {user && cartItemCount > 0 &&(
                 <span className="absolute top-2 left-5 transform translate-x-1/2 -translate-y-1/2 px-1 text-xs text-white bg-red-600 rounded-full">
-                  3
+                  {cartItemCount}
                 </span>
               )}
             </div>
@@ -341,9 +358,9 @@ const Header = () => {
                 <ShoppingCart className="h-8 w-8 mr-2" />
               </Button>
 
-              {user && (
+              {user && cartItemCount > 0 && (
                 <span className="absolute top-2 left-5 transform translate-x-1/2 -translate-y-1/2 px-1 text-xs text-white bg-red-600 rounded-full">
-                  3
+                  {cartItemCount}
                 </span>
               )}
             </div>
