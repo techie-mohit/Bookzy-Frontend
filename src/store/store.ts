@@ -9,9 +9,6 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 // ✅ redux-persist ka storage import kiya
 // Default: browser localStorage use hota hai for persistence
 import storage from "redux-persist/lib/storage";
-
-// ✅ redux-persist ke important constant actions import kiye
-// Inko Redux Toolkit ke serializableCheck mein ignore karna padta hai
 import {
   FLUSH,
   PAUSE,
@@ -28,6 +25,7 @@ import {
 import userReducer from "./slice/userSlice";
 import cartReducer from "./slice/cartSlice";
 import wishlistReducer from "./slice/wishlistSlice";
+import checkoutReducer from "./slice/checkoutSlice";
 
 // ✅ RTK Query API slice import kiya
 // Isme sab API endpoints aur auto-generated hooks hote hain
@@ -65,6 +63,12 @@ const wishlistPersistConfig = {
 }
 
 
+const checkoutPersistConfig = {
+  key: 'checkout',
+  storage
+}
+
+
 
 
 
@@ -73,6 +77,7 @@ const wishlistPersistConfig = {
 const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
 const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
 const persistedWishlistReducer = persistReducer(wishlistPersistConfig, wishlistReducer);
+const persistedCheckoutReducer = persistReducer(checkoutPersistConfig, checkoutReducer);
 
 
 // ✅ Redux Store banaya
@@ -84,7 +89,8 @@ export const store = configureStore({
     // ✅ User slice with persistence
     user: persistedUserReducer,       // e.g. "user": Auth data, saved in storage
     cart: persistedCartReducer,       // e.g. "cart": Cart data, saved in storage
-    wishlist: persistedWishlistReducer // e.g. "wishlist": Wishlist data, saved in storage
+    wishlist: persistedWishlistReducer, // e.g. "wishlist": Wishlist data, saved in storage
+    checkout: persistedCheckoutReducer // e.g. "checkout": Checkout data, saved in storage
   },
 
   // ✅ Middleware setup

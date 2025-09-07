@@ -148,7 +148,7 @@ const Header = () => {
     {
       icons: <ShoppingCart className="h-5 w-5" />,
       label: "My Cart",
-      onClick: () => handleProtectionClick("/account/cart"),
+      onClick: () => handleProtectionClick("/checkout/cart"),
     },
     {
       icons: <Heart className="h-5 w-5" />,
