@@ -4,7 +4,7 @@ import CartItems from '@/app/components/CartItems';
 import NoData from '@/app/components/NoData';
 import PriceDetails from '@/app/components/PriceDetails';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAddToWishlistMutation, useGetCartQuery, useRemoveFromCartMutation, useRemoveFromWishlistMutation } from '@/store/api';
+import { useAddToWishlistMutation, useCreateOrUpdateOrderMutation, useGetCartQuery, useRemoveFromCartMutation, useRemoveFromWishlistMutation } from '@/store/api';
 import { setCart } from '@/store/slice/cartSlice';
 import { toggleLoginDialog } from '@/store/slice/userSlice';
 import { addToWishlist, removeFromWishlist } from '@/store/slice/wishlistSlice';
@@ -29,6 +29,8 @@ const page = () => {
   const [removeWishlistMutation] = useRemoveFromWishlistMutation();
   const wishlist = useSelector((state: RootState) => state.wishlist.items);
   const cart = useSelector((state: RootState) => state.cart);
+  const [createOrUpdateOrder] = useCreateOrUpdateOrderMutation();
+
 
  useEffect(() => {
   if (cartData?.success && cartData?.data) {
@@ -107,6 +109,11 @@ const page = () => {
         );
       }
 
+
+      const totalAmount = cart.items.reduce((acc, item)=> acc + (item.product.finalPrice * item.quantity), 0);
+      const totalOriginalAmount = cart.items.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+      const totalDiscount = totalOriginalAmount - totalAmount;
+
     
 
 
@@ -170,11 +177,13 @@ const page = () => {
 
               </Card>
 
-              <div>
+              
+            </div>
+
+            <div>
                 <PriceDetails />
 
               </div>
-            </div>
           </div>
 
         </div>
