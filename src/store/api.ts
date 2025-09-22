@@ -241,12 +241,13 @@ export const api = createApi({
 
         createOrUpdateOrder: builder.mutation({
             query: ({ orderId, orderData }) => ({
-                url: API_URLS.ORDERS,
-                method: orderId ? 'PATCH' : 'POST',
-                body: orderData
+                url: API_URLS.ORDERS,  // '/api/order'
+                method: 'POST',
+                body: { orderId, ...orderData }, // send orderId in body for updates
             }),
             invalidatesTags: ['Order']
         }),
+
 
 
         createRazorpayPayment: builder.mutation({
@@ -262,16 +263,16 @@ export const api = createApi({
 
         // Address Endpoints
 
-        getAddress: builder.query({
+        getAddress: builder.query<any[], void>({
             query: () => API_URLS.GET_ADDRESS,
             providesTags: ['Address']
         }),
 
-        addOrUpdateAddress: builder.mutation({
-            query: (addressData) => ({
+        addOrUpdateAddress: builder.mutation<any, any>({
+            query: (address) => ({
                 url: API_URLS.ADD_OR_UPDATE_ADDRESS,
                 method: 'POST',
-                body: addressData
+                body: address
             }),
             invalidatesTags: ['Address']
         })

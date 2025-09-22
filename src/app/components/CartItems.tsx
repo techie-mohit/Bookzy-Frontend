@@ -19,7 +19,7 @@ const CartItems: React.FC<CartItemsProp> = ({
   onToggleWishlist,
   wishlist,
 }) => {
-  console.log("Cart Items:", JSON.stringify(items, null, 2));
+  // console.log("Cart Items:", JSON.stringify(items, null, 2));
 
   return (
     <ScrollArea className="h-[400px] px-4">
