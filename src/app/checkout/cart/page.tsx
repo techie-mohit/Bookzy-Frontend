@@ -27,8 +27,12 @@ import {
   useRemoveFromCartMutation,
   useRemoveFromWishlistMutation,
 } from "@/store/api";
-import { setCart } from "@/store/slice/cartSlice";
-import { setCheckoutStep, setOrderId } from "@/store/slice/checkoutSlice";
+import { clearCart, setCart } from "@/store/slice/cartSlice";
+import {
+  resetCheckout,
+  setCheckoutStep,
+  setOrderId,
+} from "@/store/slice/checkoutSlice";
 import { toggleLoginDialog } from "@/store/slice/userSlice";
 import { addToWishlist, removeFromWishlist } from "@/store/slice/wishlistSlice";
 import { RootState } from "@/store/store";
@@ -39,6 +43,14 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import CheckoutAddress from "@/app/components/CheckoutAddress";
+import BookLoader from "@/lib/BookLoader";
+import Script from "next/script";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 const page = () => {
   const router = useRouter();
@@ -85,6 +97,7 @@ const page = () => {
       const result = await removeCartMutation(productId).unwrap();
       if (result.success) {
         dispatch(setCart(result.data));
+        // dispatch(resetCheckout());
         toast.success(result.message || "Item removed from cart");
       }
     } catch (error) {
@@ -126,31 +139,6 @@ const page = () => {
     dispatch(toggleLoginDialog());
   };
 
-  if (!user) {
-    return (
-      <NoData
-        message="Please log in to access your cart."
-        description="You need to be logged in to view your cart and checkout."
-        buttonText="Login"
-        imageUrl="/images/login.jpg"
-        onClick={handleOpenLogin}
-      />
-    );
-  }
-
-  if (cart.items.length === 0) {
-    return (
-      <NoData
-        message="Your cart is empty."
-        description="Looks like you haven't added any items yet. 
-            Explore our collection and find something you love!"
-        buttonText="Browse Books"
-        imageUrl="/images/cart.webp"
-        onClick={() => router.push("/books")}
-      />
-    );
-  }
-
   const totalAmount = cart.items.reduce(
     (acc, item) => acc + item.product.finalPrice * item.quantity,
     0
@@ -173,7 +161,7 @@ const page = () => {
     if (step === "cart") {
       try {
         const result = await createOrUpdateOrder({
-          orderData: { items: cart.items, totalAmount: totalAmount },
+          orderData: { totalAmount: finalAmount },
         }).unwrap();
         console.log("Order Creation Result:", result);
         if (result.success && result.data?._id) {
@@ -217,10 +205,110 @@ const page = () => {
     }
   };
 
-  const handlePayment = async () => {};
+  const handlePayment = async () => {
+    if (!orderId) {
+      toast.error("Order ID is missing. Please try again.");
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      const { data, error } = await createRazorpayPayment(orderId);
+      // console.log("Razorpay Payment Data:", data, "Error:", error);
+      if (error) {
+        throw new Error("Failed to create Razorpay order. Please try again.");
+      }
+
+      const razorpayOrder = data.data.order;
+      console.log("Razorpay Order Details:", razorpayOrder);
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        name: "Book Kart",
+        description: "Book Purchase",
+        order_id: razorpayOrder.id,
+        handler: async function (response: any) {
+          try {
+            const result = await createOrUpdateOrder({
+              orderData: {
+                orderId,
+                paymentDetails: {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                },
+              },
+            }).unwrap();
+
+            if (result.success) {
+              dispatch(clearCart());
+              dispatch(resetCheckout());
+              toast.success("Payment successful! Order placed.");
+              router.push(`/checkout/payment-success?orderId=${orderId}`);
+            } else {
+              throw new Error(result.message || "Payment verification failed");
+            }
+          } catch (error) {
+            toast.error(
+              "Payment successful but failed to update order. Contact support with your order ID."
+            );
+            console.log("Failed to update order", error);
+          }
+        },
+        prefill: {
+          name: orderData?.data?.user?.name,
+          email:  orderData?.data?.user?.email,
+          contact: orderData?.data?.user?.phoneNumber,
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      toast.error("Failed to initiate payment. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <NoData
+        message="Please log in to access your cart."
+        description="You need to be logged in to view your cart and checkout."
+        buttonText="Login"
+        imageUrl="/images/login.jpg"
+        onClick={handleOpenLogin}
+      />
+    );
+  }
+
+  if (cart.items.length === 0) {
+    return (
+      <NoData
+        message="Your cart is empty."
+        description="Looks like you haven't added any items yet. 
+            Explore our collection and find something you love!"
+        buttonText="Browse Books"
+        imageUrl="/images/cart.webp"
+        onClick={() => router.push("/books")}
+      />
+    );
+  }
+
+  if (isCartLoading || isOrderLoading) {
+    return <BookLoader />;
+  }
 
   return (
     <>
+      <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
       <div className="min-h-screen bg-white">
         <div className="bg-gray-100 py-4 px-6 mb-8">
           <div className="container mx-auto flex items-center">
