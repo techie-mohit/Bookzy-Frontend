@@ -94,42 +94,54 @@ const page = () => {
     setValue("images", uploadFiles);
   };
 
-  const onSubmit = async (data: BookDetails) => {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (key !== "images") {
-          formData.append(key, value as string);
-        }
-      });
+const onSubmit = async (data: BookDetails) => {
+  try {
+    const formData = new FormData();
 
-      if (data.paymentMode === "UPI") {
-        formData.append(
-          "paymentDetails",
-          JSON.stringify({ upiId: data.paymentDetails.upiId })
-        );
-      } else if (data.paymentMode === "Bank Account") {
-        formData.set(
-          "paymentDetails",
-          JSON.stringify({ bankDetails: data.paymentDetails.bankDetails })
-        );
+    // Append all top-level fields except images and paymentDetails
+    Object.entries(data).forEach(([key, value]) => {
+      if (key !== "images" && key !== "paymentDetails") {
+        formData.append(key, value as string);
       }
+    });
 
-      if (Array.isArray(data.images) && data.images.length > 0) {
-        data.images.forEach((image) => formData.append("images", image));
+    // Prepare paymentDetails based on paymentMode
+    let paymentDetails: any = {};
+    if (data.paymentMode === "UPI") {
+      const upiId = data.paymentDetails?.upiId;
+      if (!upiId) {
+        toast.error("UPI ID is required");
+        return;
       }
-
-      const result = await addProducts(formData).unwrap();
-      if (result.success) {
-        router.push(`/book/${result.data.id}`);
-        toast.success("Book added successfully!");
-        reset();
+      paymentDetails = { upiId }; // matches backend
+    } else if (data.paymentMode === "Bank Account") {
+      const bank = data.paymentDetails?.bankDetails;
+      if (!bank?.accountNumber || !bank?.ifscCode || !bank?.bankName) {
+        toast.error("Complete bank details are required");
+        return;
       }
-    } catch (error) {
-      toast.error("Failed to list the  book. Please try again.");
-      console.log(error);
+      paymentDetails = { bankDetails: bank }; // matches backend
     }
-  };
+
+    formData.append("paymentDetails", JSON.stringify(paymentDetails));
+
+    // Append images
+    if (Array.isArray(data.images) && data.images.length > 0) {
+      data.images.forEach((image) => formData.append("images", image));
+    }
+
+    const result = await addProducts(formData).unwrap();
+    if (result.success) {
+      router.push(`/book/${result.data.id}`);
+      toast.success("Book added successfully!");
+      reset();
+    }
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error.message || "Failed to list the book. Please try again.");
+  }
+};
+
 
   const paymentMode = watch("paymentMode");
   const handleOpenLogin = () => {
@@ -187,10 +199,10 @@ const page = () => {
                 <div className="md:w-3/4">
                   <Input
                     {...register("title", {
-                      required: "Email is required",
+                      required: "Title is required",
                     })}
                     placeholder="Enter your add title"
-                    type="Email"
+                    type="text"
                     className="pl-4"
                   />
                   {errors.title && (
@@ -334,7 +346,7 @@ const page = () => {
                       required: "subject is required",
                     })}
                     placeholder="Enter your Book Subject"
-                    type="Email"
+                    type="text"
                     className="pl-4"
                   />
                   {errors.subject && (

@@ -31,7 +31,7 @@ const navigation = [
     title: "Selling Products",
     href: "/account/selling-products",
     icon: BookOpen,
-    color: "from-yellow-500 to-orange-500",
+    color: "from-green-500 to-yellow-300",
   },
   {
     title: "Wishlist",
@@ -139,6 +139,12 @@ const layout = ({ children }: { children: React.ReactNode }) => {
             </Button>
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-col">
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+            {children}
+        </main>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ const API_URLS = {
     PRODUCTS: `${BASE_URL}/products`,
     PRODUCT_BY_ID: (id: string) => `${BASE_URL}/products/${id}`,
     GET_PRODUCT_BY_SELLER_ID: (sellerId: string) => `${BASE_URL}/products/seller/${sellerId}`,
-    DELETE_PRODUCT_BY_PRODUCT_ID: (productId: string) => `${BASE_URL}/products/${productId}`,
+    DELETE_PRODUCT_BY_PRODUCT_ID: (productId: string) => `${BASE_URL}/products/delete/${productId}`,
 
 
     // cart related urls
