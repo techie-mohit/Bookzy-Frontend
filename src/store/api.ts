@@ -3,7 +3,7 @@
 // 2️⃣ fetchBaseQuery - ek built-in baseQuery function jo simple fetch request banata hai
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_URLS = {
 
     // user related urls 
