@@ -44,11 +44,12 @@ const navigation = [
 const layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const user = useSelector((state: RootState) => state.user.user);
+  console.log("user", user);
   const dispatch = useDispatch();
   const router = useRouter();
 
   const [logoutMutation] = useLogoutMutation();
-  const userPlaceholder = user?.name
+  const userPlaceholder = user?.data?.name
     ?.split(" ")
     .map((name: string) => name[0])
     .join("");
@@ -97,9 +98,9 @@ const layout = ({ children }: { children: React.ReactNode }) => {
             <div className="px-6 py-2">
               <div className="flex items-center gap-4">
                 <Avatar className="w-12 h-12 -ml-2 rounded-full">
-                  {user?.profilePicture ? (
+                  {user?.data?.profilePicture ? (
                     <AvatarImage
-                      src={user?.profilePicture}
+                      src={user?.data?.profilePicture}
                       alt="user_image"
                     ></AvatarImage>
                   ) : (
@@ -107,8 +108,8 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                   )}
                 </Avatar>
                 <div className="space-y-1">
-                    <p className="text-md font-medium leading-none text-white">{user?.name}</p>
-                    <p className="text-sm text-purple-200">{user?.email}</p>
+                    <p className="text-md font-medium leading-none text-white">{user?.data?.name}</p>
+                    <p className="text-sm text-purple-200">{user?.data?.email}</p>
                 </div>
               </div>
             </div>

@@ -54,7 +54,7 @@ const Header = () => {
   const user = useSelector((state:RootState)=> state.user.user );
   const [logoutMutation] = useLogoutMutation();
   // console.log(user);
-  const userPlaceholder = user?.name?.split(" ").map((name:string) => name[0]).join("");
+  const userPlaceholder = user?.data?.name?.split(" ").map((name:string) => name[0]).join("");
   const cartItemCount = useSelector((state: RootState)=> state.cart.items.length);
   const {data:cartData} = useGetCartQuery(user?._id, {skip:!user});
 
@@ -106,16 +106,16 @@ const Header = () => {
             content: (
               <div className="flex space-x-4 items-center p-2 border-b">
                 <Avatar className="w-12 h-12 -ml-2 rounded-full">
-                  {user?.profilePicture ? (
-                    <AvatarImage src={user?.profilePicture} alt="user_image"></AvatarImage>
+                  {user?.data?.profilePicture ? (
+                    <AvatarImage src={user?.data?.profilePicture} alt="user_image"></AvatarImage>
                   ) : (
                     <AvatarFallback>{userPlaceholder}</AvatarFallback>
                   )}
                 </Avatar>
 
                 <div className="flex flex-col">
-                  <span className="font-semibold text-md">{user?.name}</span>
-                  <span className="text-sm text-gray-500">{user?.email}</span>
+                  <span className="font-semibold text-md">{user?.data?.name}</span>
+                  <span className="text-sm text-gray-500">{user?.data?.email}</span>
                 </div>
               </div>
             ),
@@ -143,7 +143,7 @@ const Header = () => {
     {
       icons: <PiggyBank className="h-5 w-5" />,
       label: "My Selling Orders",
-      onClick: () => handleProtectionClick("/account/selling-orders"),
+      onClick: () => handleProtectionClick("/account/selling-products"),
     },
     {
       icons: <ShoppingCart className="h-5 w-5" />,
@@ -158,22 +158,17 @@ const Header = () => {
     {
       icons: <User2 className="h-5 w-5" />,
       label: "About Us",
-      href: "/account/about-us",
+      href: "/about-us",
     },
     {
       icons: <FileText className="h-5 w-5" />,
       label: "Terms & Use",
-      href: "/account/terms-of-use",
+      href: "/terms-of-use",
     },
     {
       icons: <BookLock className="h-5 w-5" />,
       label: "Privacy Policy",
-      href: "/account/privacy-policy",
-    },
-    {
-      icons: <HelpCircle className="h-5 w-5" />,
-      label: "Help & Support",
-      href: "/account/how-it-works",
+      href: "/privacy-policy",
     },
     ...(user && user ?  [
       {

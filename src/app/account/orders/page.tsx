@@ -85,11 +85,11 @@ const page = () => {
                   <span className="text-sm">Status : </span>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      order.status === "delivered"
+                      order?.status === "delivered"
                         ? "bg-green-100 text-green-700"
-                        : order.status === "processing"
+                        : order?.status === "processing"
                         ? "bg-yellow-100 text-yellow-700"
-                        : order.status === "shipped"
+                        : order?.status === "shipped"
                         ? "bg-blue-100 text-blue-700"
                         : "bg-red-100 text-red-700"
                     }`}
