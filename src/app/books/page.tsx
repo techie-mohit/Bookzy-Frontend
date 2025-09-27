@@ -51,7 +51,7 @@ const Page = () => {
     }
   }, [apiResponse])
 
-  console.log(books);
+  // console.log(books);
 
   const searchTerms = new URLSearchParams(window.location.search).get("search") || "";
 

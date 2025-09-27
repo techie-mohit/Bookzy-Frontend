@@ -23,34 +23,38 @@ import { useDispatch, useSelector } from "react-redux";
 
 const page = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const user = useSelector((state: RootState) => state.user.user);
+
+  const rawUser = useSelector((state: RootState) => state.user.user);
+
+  // Normalize the user object
+  const user = rawUser?.data ? rawUser.data : rawUser;
+
+  console.log("Normalized user:", user);
+
   const [updateUser, { isLoading }] = useUpdateUserMutation();
   const dispatch = useDispatch();
 
   const { register, handleSubmit, reset } = useForm<UserData>({
     defaultValues: {
-      name: user?.data?.name || "",
-      email: user?.data?.email || "",
-      phoneNumber: user?.data?.phoneNumber || "",
+      name: user?.name || "",
+      email: user?.email || "",
+      phoneNumber: user?.phoneNumber || "",
     },
   });
 
- 
-
   useEffect(() => {
     reset({
-      name: user?.data?.name || "",
-      email: user?.data?.email || "",
-      phoneNumber: user?.data?.phoneNumber || "",
+      name: user?.name || "",
+      email: user?.email || "",
+      phoneNumber: user?.phoneNumber || "",
     });
   }, [user, isEditing, reset]);
 
- 
   const handleProfileEdit = async (data: UserData) => {
     const { name, phoneNumber } = data;
     try {
       const result = await updateUser({
-        userId: user?.data?._id,
+        userId: user?._id,
         userData: { name, phoneNumber },
       });
       if (result && result?.data) {
@@ -109,7 +113,7 @@ const page = () => {
                   <Input
                     id="email"
                     placeholder="john@example.com"
-                    disabled={!isEditing || isEditing}
+                    disabled
                     className="pl-14"
                     {...register("email")}
                   />
@@ -156,16 +160,14 @@ const page = () => {
                   </Button>
                 </>
               ) : (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="bg-gradient-to-r mt-2 from-pink-500 to-rose-500 text-white"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </Button>
-                </>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="bg-gradient-to-r mt-2 from-pink-500 to-rose-500 text-white"
+                  onClick={() => setIsEditing(true)}
+                >
+                  Edit Profile
+                </Button>
               )}
             </CardFooter>
           </form>

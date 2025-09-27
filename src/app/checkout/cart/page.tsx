@@ -55,7 +55,8 @@ declare global {
 const page = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.user.user);
+  const rawUser = useSelector((state: RootState) => state.user.user);  
+  const user = rawUser?.data ? rawUser.data : rawUser;
   const { orderId, step } = useSelector((state: RootState) => state.checkout);
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);

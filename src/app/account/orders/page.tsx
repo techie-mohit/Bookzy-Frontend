@@ -27,7 +27,7 @@ const page = () => {
   }
 
   const orders: Order[] = orderData?.data || [];
-  console.log(orders);
+  // console.log(orders);
   const displayedOrders = showAllOrders ? orders : orders.slice(0, 10);
 
   if (orders.length === 0) {

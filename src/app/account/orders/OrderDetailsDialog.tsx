@@ -24,7 +24,7 @@ const StatusStep = ({ icon, title, isCompleted, isActive }: { icon: React.ReactN
 
 const OrderDetailsDialog = ({ order }: OrderDetailsDialogProps) => {
 
-    console.log("orders ", order);
+    // console.log("orders ", order);
 
     const getStatusIndex = (Status: string) => {
         const statuses = ['processing', 'shipped', 'delivered', 'cancelled'];

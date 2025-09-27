@@ -54,7 +54,8 @@ const page = () => {
   const [addProducts, { isLoading }] = useAddProductsMutation();
   const dispatch = useDispatch();
   const router = useRouter();
-  const user = useSelector((state: RootState) => state.user.user);
+  const rawUser = useSelector((state: RootState) => state.user.user);
+   const user = rawUser?.data ? rawUser.data : rawUser;
 
   const {
     register,

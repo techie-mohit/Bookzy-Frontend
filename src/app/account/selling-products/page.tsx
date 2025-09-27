@@ -32,7 +32,7 @@ const page = () => {
     return <BookLoader />
   }
 
-  console.log(books);
+  // console.log(books);
 
   if (books.length === 0) {
     return (
