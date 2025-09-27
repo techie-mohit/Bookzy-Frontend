@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Bookzy Frontend
 
-First, run the development server:
+**Deployed App:** https://bookzy-frontend-p6gd.vercel.app/
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Overview
+
+Bookzy Frontend is a modern, responsive web application for a book marketplace, built with Next.js, TypeScript, Redux Toolkit, and Tailwind CSS. It connects to the Bookzy backend for all data and user actions.
+
+---
+
+## How to Use Locally
+
+1. Clone the repository and go to the `frontend` folder.
+2. Run `npm install` to install dependencies.
+3. Create a `.env` file and set your backend API URL:
+	 ```
+	 NEXT_PUBLIC_API_URL = http://localhost:4000/api
+	 NEXT_PUBLIC_RAZORPAY_KEY_ID = your_razorpay_key_id
+	 ```
+4. Start the development server:
+	 ```bash
+	 npm run dev
+	 ```
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## Folder & File Structure
+
+### Root Files
+- `next.config.mjs`, `next-env.d.ts`, `tsconfig.json`, `postcss.config.mjs` — Next.js and TypeScript configuration.
+- `package.json`, `package-lock.json` — Dependency management.
+- `.env` — Environment variables (not committed).
+- `.gitignore` — Files/folders to ignore in git.
+
+### public/
+- `icons/` — Payment and UI icons (ads, delivery, paytm, visa, etc.)
+- `images/` — Book images, cart, logo, etc.
+
+### src/
+- `app/` — Main app pages and layouts
+	- `about-us/`, `privacy-policy/`, `terms-of-use/`, `verify-email/`, `reset-password/`, `book-sell/`, `books/`, `checkout/`, `account/` — Feature pages
+	- `components/` — UI components for pages (AuthPage, CartItems, Footer, Header, NewBooks, NoData, Pagination, PriceDetails, Share)
+	- `layout.tsx`, `LayoutWrapper.tsx`, `globals.css` — App layout and global styles
+- `components/ui/` — Custom UI components
+- `lib/` — Shared logic and types
+	- `BookLoader.tsx`, `Constant.ts`, `NoData.js`, `types/type.ts`, `utils.ts`
+- `store/` — Redux Toolkit store and slices
+	- `api.ts` — RTK Query API logic
+	- `Provider/AuthProvider.tsx` — Auth context provider
+	- `slice/` — Redux slices (cartSlice, checkoutSlice, userSlice, wishlistSlice)
+	- `store.ts` — Store setup
+
+---
+
+## Main Features
+
+- **Authentication:** Login, register, email verification, Google OAuth, password reset
+- **Product Browsing:** View books, search, filter, pagination
+- **Sell Books:** Add new books with images and payment details
+- **Cart & Wishlist:** Add/remove items, view details, move between cart and wishlist
+- **Checkout & Orders:** Address management, payment via Razorpay, order history
+- **Responsive Design:** Mobile-friendly, modern UI with Tailwind CSS
+- **Notifications:** Toasts for actions and errors
+- **API Integration:** Connects to Bookzy backend for all data
+
+---
+
+## Environment Variables (.env)
+
+Example keys to set in `.env`:
+```
+NEXT_PUBLIC_API_URL = http://localhost:4000/api
+NEXT_PUBLIC_RAZORPAY_KEY_ID = your_razorpay_key_id
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- The frontend is live at:  
+	**https://bookzy-frontend-p6gd.vercel.app/api**
+- Use this for production or demo access.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Contribution & Issues
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Open an issue or pull request for bugs, features, or improvements.
