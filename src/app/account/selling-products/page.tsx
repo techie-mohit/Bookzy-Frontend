@@ -16,9 +16,10 @@ import { useSelector } from 'react-redux'
 
 const page = () => {
 
-  const user = useSelector((state: RootState) => state.user.user);
+  const rawUser = useSelector((state: RootState) => state.user.user);
+  const user = rawUser?.data ? rawUser.data : rawUser;
   const router = useRouter();
-  const { data: products, isLoading } = useGetProductBySellerIdQuery(user?.data?._id);
+  const { data: products, isLoading } = useGetProductBySellerIdQuery(user?._id);
   const [deleteProductById] = useDeleteProductByIdMutation();
   const [books, setBooks] = React.useState<any[]>([]);
 
