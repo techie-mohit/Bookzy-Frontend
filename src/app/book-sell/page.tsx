@@ -51,7 +51,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const page = () => {
   const [uploadImages, setUploadImages] = useState<string[]>([]);
-  const [addProducts, {isLoading}] = useAddProductsMutation();
+  const [addProducts, { isLoading }] = useAddProductsMutation();
   const dispatch = useDispatch();
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
@@ -94,53 +94,57 @@ const page = () => {
     setValue("images", uploadFiles);
   };
 
-const onSubmit = async (data: BookDetails) => {
-  try {
-    const formData = new FormData();
+  const onSubmit = async (data: BookDetails) => {
+    try {
 
-    // Append all top-level fields except images and paymentDetails
-    Object.entries(data).forEach(([key, value]) => {
-      if (key !== "images" && key !== "paymentDetails") {
-        formData.append(key, value as string);
+      if (data.shippingCharge === "free") {
+        data.shippingCharge = 0 as unknown as string; // FormData needs string
       }
-    });
+      const formData = new FormData();
 
-    // Prepare paymentDetails based on paymentMode
-    let paymentDetails: any = {};
-    if (data.paymentMode === "UPI") {
-      const upiId = data.paymentDetails?.upiId;
-      if (!upiId) {
-        toast.error("UPI ID is required");
-        return;
+      // Append all top-level fields except images and paymentDetails
+      Object.entries(data).forEach(([key, value]) => {
+        if (key !== "images" && key !== "paymentDetails") {
+          formData.append(key, value as string);
+        }
+      });
+
+      // Prepare paymentDetails based on paymentMode
+      let paymentDetails: any = {};
+      if (data.paymentMode === "UPI") {
+        const upiId = data.paymentDetails?.upiId;
+        if (!upiId) {
+          toast.error("UPI ID is required");
+          return;
+        }
+        paymentDetails = { upiId }; // matches backend
+      } else if (data.paymentMode === "Bank Account") {
+        const bank = data.paymentDetails?.bankDetails;
+        if (!bank?.accountNumber || !bank?.ifscCode || !bank?.bankName) {
+          toast.error("Complete bank details are required");
+          return;
+        }
+        paymentDetails = { bankDetails: bank }; // matches backend
       }
-      paymentDetails = { upiId }; // matches backend
-    } else if (data.paymentMode === "Bank Account") {
-      const bank = data.paymentDetails?.bankDetails;
-      if (!bank?.accountNumber || !bank?.ifscCode || !bank?.bankName) {
-        toast.error("Complete bank details are required");
-        return;
+
+      formData.append("paymentDetails", JSON.stringify(paymentDetails));
+
+      // Append images
+      if (Array.isArray(data.images) && data.images.length > 0) {
+        data.images.forEach((image) => formData.append("images", image));
       }
-      paymentDetails = { bankDetails: bank }; // matches backend
-    }
 
-    formData.append("paymentDetails", JSON.stringify(paymentDetails));
-
-    // Append images
-    if (Array.isArray(data.images) && data.images.length > 0) {
-      data.images.forEach((image) => formData.append("images", image));
+      const result = await addProducts(formData).unwrap();
+      if (result.success) {
+        router.push(`/books/${result?.data?._id}`);
+        toast.success("Book added successfully!");
+        reset();
+      }
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.message || "Failed to list the book. Please try again.");
     }
-
-    const result = await addProducts(formData).unwrap();
-    if (result.success) {
-      router.push(`/book/${result.data.id}`);
-      toast.success("Book added successfully!");
-      reset();
-    }
-  } catch (error: any) {
-    console.log(error);
-    toast.error(error.message || "Failed to list the book. Please try again.");
-  }
-};
+  };
 
 
   const paymentMode = watch("paymentMode");
@@ -581,7 +585,11 @@ const onSubmit = async (data: BookDetails) => {
                       <Controller
                         name="shippingCharge"
                         control={control}
-                        rules={{ required: "Shiiping Charge is required" }}
+                        // ✅ only require a value when it's not "free"
+                        rules={{
+                          validate: (val) =>
+                            val === "free" || (val && val.trim() !== "") || "Shipping Charge is required",
+                        }}
                         render={({ field }) => (
                           <Checkbox
                             id="freeShipping"
@@ -614,7 +622,7 @@ const onSubmit = async (data: BookDetails) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
-              
+
 
               <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
                 <Label
@@ -623,7 +631,7 @@ const onSubmit = async (data: BookDetails) => {
                   Payment Mode
                 </Label>
                 <div className="space-y-2 md:w-3/4">
-                <p className="text-sm text-muted-foreground mb-2">After your book is sold , in what mode would you like to receive the payment?</p>
+                  <p className="text-sm text-muted-foreground mb-2">After your book is sold , in what mode would you like to receive the payment?</p>
                   <Controller
                     name="paymentMode"
                     control={control}
@@ -654,136 +662,136 @@ const onSubmit = async (data: BookDetails) => {
               {
                 paymentMode === 'UPI' && (
                   <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
-                <Label
-                  htmlFor="upiId"
-                  className="md:w-1/4 font-medium text-gray-700"
-                >
-                  UPI ID
-                </Label>
-                <div className="md:w-3/4">
-                  <Input
-                    {...register("paymentDetails.upiId", {
-                      required: "UPI ID is required",
-                      pattern: {
-                        value: /[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}/,
-                        message: "Invalid UPI ID format"
-                      }
-                    })}
-                    placeholder="Enter your UPI ID"
-                    type="text"
-                    className="pl-4"
-                  />
-                  {errors.paymentDetails?.upiId && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.paymentDetails.upiId.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+                    <Label
+                      htmlFor="upiId"
+                      className="md:w-1/4 font-medium text-gray-700"
+                    >
+                      UPI ID
+                    </Label>
+                    <div className="md:w-3/4">
+                      <Input
+                        {...register("paymentDetails.upiId", {
+                          required: "UPI ID is required",
+                          pattern: {
+                            value: /[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}/,
+                            message: "Invalid UPI ID format"
+                          }
+                        })}
+                        placeholder="Enter your UPI ID"
+                        type="text"
+                        className="pl-4"
+                      />
+                      {errors.paymentDetails?.upiId && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.paymentDetails.upiId.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
 
                 )}
 
-                {
-                  paymentMode === 'Bank Account' && (
-                   <>
+              {
+                paymentMode === 'Bank Account' && (
+                  <>
                     <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
-                <Label
-                  htmlFor="accountNumber"
-                  className="md:w-1/4 font-medium text-gray-700"
-                >
-                  Account Number
-                </Label>
-                <div className="md:w-3/4">
-                  <Input
-                    {...register("paymentDetails.bankDetails.accountNumber", {
-                      required: "Account Number is required",
-                      pattern: {
-                        value: /^[0-9]{9,18}$/,
-                        message: "Invalid Account Number format"
-                      }
-                    })}
-                    placeholder="Enter your Account Number"
-                    type="text"
-                    className="pl-4"
-                  />
-                  {errors.paymentDetails?.bankDetails?.accountNumber && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.paymentDetails.bankDetails.accountNumber.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-               <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
-                <Label
-                  htmlFor="ifscCode"
-                  className="md:w-1/4 font-medium text-gray-700"
-                >
-                  IFSE Code
-                </Label>
-                <div className="md:w-3/4">
-                  <Input
-                    {...register("paymentDetails.bankDetails.ifscCode", {
-                      required: "IFSC Code is required",
-                      pattern: {
-                        value: /^[A-Z]{4}0[A-Z0-9]{6}$/,
-                        message: "Invalid IFSC Code format"
-                      }
-                    })}
-                    placeholder="Enter your IFSC Code"
-                    type="text"
-                    className="pl-4"
-                  />
-                  {errors.paymentDetails?.bankDetails?.ifscCode && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.paymentDetails.bankDetails.ifscCode.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-               <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
-                <Label
-                  htmlFor="bankName"
-                  className="md:w-1/4 font-medium text-gray-700"
-                >
-                  Bank Name
-                </Label>
-                <div className="md:w-3/4">
-                  <Input
-                    {...register("paymentDetails.bankDetails.bankName", {
-                      required: "Bank Name is required",
-                    })}
-                    placeholder="Enter your Bank Name"
-                    type="text"
-                    className="pl-4"
-                  />
-                  {errors.paymentDetails?.bankDetails?.bankName && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.paymentDetails.bankDetails.bankName.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </>
+                      <Label
+                        htmlFor="accountNumber"
+                        className="md:w-1/4 font-medium text-gray-700"
+                      >
+                        Account Number
+                      </Label>
+                      <div className="md:w-3/4">
+                        <Input
+                          {...register("paymentDetails.bankDetails.accountNumber", {
+                            required: "Account Number is required",
+                            pattern: {
+                              value: /^[0-9]{9,18}$/,
+                              message: "Invalid Account Number format"
+                            }
+                          })}
+                          placeholder="Enter your Account Number"
+                          type="text"
+                          className="pl-4"
+                        />
+                        {errors.paymentDetails?.bankDetails?.accountNumber && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.paymentDetails.bankDetails.accountNumber.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-                  )}
-              
-              
+                    <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                      <Label
+                        htmlFor="ifscCode"
+                        className="md:w-1/4 font-medium text-gray-700"
+                      >
+                        IFSE Code
+                      </Label>
+                      <div className="md:w-3/4">
+                        <Input
+                          {...register("paymentDetails.bankDetails.ifscCode", {
+                            required: "IFSC Code is required",
+                            pattern: {
+                              value: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+                              message: "Invalid IFSC Code format"
+                            }
+                          })}
+                          placeholder="Enter your IFSC Code"
+                          type="text"
+                          className="pl-4"
+                        />
+                        {errors.paymentDetails?.bankDetails?.ifscCode && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.paymentDetails.bankDetails.ifscCode.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                      <Label
+                        htmlFor="bankName"
+                        className="md:w-1/4 font-medium text-gray-700"
+                      >
+                        Bank Name
+                      </Label>
+                      <div className="md:w-3/4">
+                        <Input
+                          {...register("paymentDetails.bankDetails.bankName", {
+                            required: "Bank Name is required",
+                          })}
+                          placeholder="Enter your Bank Name"
+                          type="text"
+                          className="pl-4"
+                        />
+                        {errors.paymentDetails?.bankDetails?.bankName && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.paymentDetails.bankDetails.bankName.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+
+                )}
+
+
             </CardContent>
           </Card>
 
           <Button type="submit" disabled={isLoading} className="w-60 text-md bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-orange-600 hover:to-orange-700 font-semibold py-6 shadow-lg rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
             {isLoading ? (
               <>
-              <Loader2 className="animate-spin mr-2" size={20} />
-              Saving ...
+                <Loader2 className="animate-spin mr-2" size={20} />
+                Saving ...
               </>
             ) : ("Post Your Books")}
           </Button>
 
-         <p className="mt-2 text-sm text-center text-gray-600">
+          <p className="mt-2 text-sm text-center text-gray-600">
             By Clicking "Post Your Books", you agree to our{" "}
             <Link href="/terms-of-use" className="text-blue-500 underline">
               Terms of Service
