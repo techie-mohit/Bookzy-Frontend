@@ -20,8 +20,22 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import NewBooks from "./components/NewBooks";
 import { Card, CardContent } from "@/components/ui/card";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  const user = useSelector((state:RootState) => state.user.user);
+
+  useEffect(()=>{
+    if(user && user.role !== "user"){
+      router.push('/admin');
+    }
+  },[ user, router]);
+
+  
   const bannerImages = [
     "/images/book1.jpg",
     "/images/book2.jpg",
@@ -211,7 +225,6 @@ export default function Home() {
                     <h3 className=" mb-2 font-semibold">{step.title}</h3>
                     <p className="text-gray-600 text-sm flex-grow">{step.description}</p>
                   </div>
-                  
                 </div>
               ))}
           </div>

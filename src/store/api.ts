@@ -1,6 +1,24 @@
-// ✅ redux-toolkit/query se do important utilities import kiye hain:
-// 1️⃣ createApi - RTK Query ka main function jo API service banata hai
-// 2️⃣ fetchBaseQuery - ek built-in baseQuery function jo simple fetch request banata hai
+// createApi is a function used to define/create an API service in RTK Query.
+    // It helps you:
+    // Define server ka  base URL
+    // Define server ka endpoints (GET, POST, PUT, DELETE)
+    // Handle caching automatically
+    // Generate React hooks automatically
+    // So you don't need to manually use fetch, axios, useState, useEffect.
+
+// fetchBaseQuery ek helper function hai jo fetch API use karke server se data lane me help karta hai.
+    // Ye automatically handle karta hai:
+    // base URL
+    // headers
+    // request
+    // response parsing
+    // Ye fetch ka simplified version hai.   
+    
+// without using fetchBaseQuery, aapko manually fetch/axios se request bhejni padti, headers set karne padte, response parse karna padta, error handling karni padti.  
+
+
+
+
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -46,6 +64,11 @@ const API_URLS = {
 }
 
 
+    // BASE_URL = https://api.example.com
+    // endpoint url = /products
+    // final url =  https://api.example.com/products
+
+
 // Ye Redux store mein ek RTK Query API slice banata hai
 export const api = createApi({
 
@@ -53,29 +76,17 @@ export const api = createApi({
     // Ye batata hai ki sab endpoints ki request kaise jayegi
     // fetchBaseQuery ek simplified fetch wrapper hai
     baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL,         // Sab requests isi base URL se jayengi
+        baseUrl: BASE_URL,         // Sab requests isi base URL se start hongi
         credentials: 'include',    // Cookies ko request mein bhejne ke liye
-        // Useful for authentication (e.g., sessions)
     }),
 
-    // ✅ tagTypes:
-    // Ye ek optional config hai
-    // RTK Query cache invalidation ke liye tags define karta hai
-    // Example mein 'User' tag define kiya hai
-    // Iska use refetch/invalidating cache ke liye hota hai
     tagTypes: ['User', 'Product', 'Cart', 'Wishlist', 'Order', 'Address'],
-
-    // ✅ endpoints:
-    // Ye function hai jo sab endpoints define karega
-    // Builder pattern use karke queries aur mutations banate hain
-    // Filhal ye empty hai => koi endpoint nahi define kiya
-    endpoints: (builder) => ({
-        // ⚠️ abhi yahan koi endpoint nahi likha
-        // future mein builder.query ya builder.mutation se endpoints banayenge
+    endpoints: (builder) => ({          // builder use hota hai create karne ke liye:
+    
 
         // USER ENDPOINTS
 
-        register: builder.mutation({
+        register: builder.mutation({                // builder.mutation use hota hai POST, PUT, DELETE requests ke liye
             query: (userData) => ({
                 url: API_URLS.REGISTER,
                 method: 'POST',
@@ -104,7 +115,7 @@ export const api = createApi({
                 method: 'POST',
                 body: userData   // ✅ send as-is, not wrapped again
             }),
-            invalidatesTags: ['User']
+            invalidatesTags: ['User']                      // "User data change ho gaya → cache refresh karo" Automatically  fir se call ho jayega.
         }),
         resetPassword: builder.mutation({
             query: ({ token, newPassword }) => ({
@@ -154,9 +165,12 @@ export const api = createApi({
             invalidatesTags: ['Product']
         }),
 
-        getProducts: builder.query({
-            query: () => API_URLS.PRODUCTS,
-            providesTags: ['Product']
+        getProducts: builder.query({                        // builder.query  Used for GET requests
+            query: () => ({
+                url: API_URLS.PRODUCTS,
+                credentials: 'omit',   // skip cookies
+            }),
+            providesTags: ['Product']                          // "Ye endpoint Product data provide karta hai"  and Used to mark cached data.
         }),
 
         getProductById: builder.query({
@@ -315,3 +329,18 @@ export const {
     useGetAddressQuery,
     useAddOrUpdateAddressMutation
 } = api;
+
+
+
+// Tag Types kya hote hain?
+// Tag Types are used to identify and manage cached data in RTK Query.
+// Common tag types include: 'Product', 'User', 'Cart', 'Wishlist', 'Order', 'Address'
+// When an endpoint invalidates a tag, it tells RTK Query to refresh any cached data associated with that tag.
+// Ye define karta hai ki application me kaun-kaun se data categories (jaise User, Product, Cart, etc.) cache honge aur unko kaise track kiya jayega. Jab koi query data fetch karti hai, to wo providesTags ke through us data ko ek specific tag ke under cache me store karti hai, aur jab koi mutation data ko change karta hai (jaise add, update, delete), to wo invalidatesTags ke through us tag ko invalidate karta hai, jisse RTK Query automatically data ko refetch karta hai aur UI ko latest data ke sath update kar deta hai. Isse performance improve hoti hai, unnecessary API calls reduce hoti hain, aur data hamesha fresh aur synchronized rehta hai without manually refreshing the page.
+
+
+// Provide and Invalidate Tags kya hote hain?
+// Provide Tags: Jab aap kisi query endpoint me providesTags use karte hain, to aap RTK Query ko batate hain ki ye endpoint kis tag type ka data provide karta hai. Iska matlab hai ki jab ye query successfully data fetch karti hai, to wo us data ko specified tag ke sath cache me store kar degi. For example, agar aap getProducts query me providesTags: ['Product'] set karte hain, to iska matlab hai ki ye query Product tag type ka data provide karti hai aur jab bhi ye query call hogi, to fetched products data Product tag ke under cache me store ho jayega.
+
+
+// Invalidate Tags: Invalidate = cache ko invalid mark karna, not directly change data  Jab aap kisi mutation endpoint me invalidatesTags use karte hain, to aap RTK Query ko batate hain ki ye mutation kis tag type ke data ko invalidate karta hai. Iska matlab hai ki jab ye mutation successfully execute hoti hai (jaise add, update, delete), to wo specified tag ke sath associated cached data ko invalidate kar degi. For example, agar aap addProducts mutation me invalidatesTags: ['Product'] set karte hain, to iska matlab hai ki jab bhi ye mutation call hogi aur successfully execute hogi, to Product tag ke under cache me stored products data invalidate ho jayega, jisse RTK Query automatically getProducts query ko refetch(fetch karna data dubara from server se ) karega aur UI ko latest products data ke sath update kar dega. Isse ensure hota hai ki aapka UI hamesha fresh aur synchronized data dikhata hai without manually refreshing the page.

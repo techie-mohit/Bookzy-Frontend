@@ -1,14 +1,28 @@
-// ✅ Redux Toolkit se configureStore import kiya hai
-// configureStore => Redux store banane ka helper function
+// ================= REDUX STORE SETUP =================
+
+// configureStore Redux Toolkit ka helper function hai
+// Ye Redux store create karta hai with:
+// - reducers
+// - middleware
+// - devtools support
+// - better default configuration
 import { configureStore } from "@reduxjs/toolkit";
 
-// ✅ RTK Query ke setupListeners utility import kiya
-// Ye focus/reconnect pe auto-refetch enable karta hai
+
+// setupListeners RTK Query ka utility function hai
+// Ye automatic refetch enable karta hai jab:
+// - browser tab focus hota hai
+// - internet reconnect hota hai
 import { setupListeners } from "@reduxjs/toolkit/query";
 
-// ✅ redux-persist ka storage import kiya
-// Default: browser localStorage use hota hai for persistence
+
+// ================= REDUX PERSIST SETUP =================
+
+// storage redux-persist ka storage engine hai
+// Default: browser localStorage use hota hai
+// Isse Redux state browser refresh ke baad bhi save rehta hai
 import storage from "redux-persist/lib/storage";
+
 import {
   FLUSH,
   PAUSE,
@@ -20,103 +34,178 @@ import {
   REHYDRATE
 } from "redux-persist";
 
-// ✅ Apna user slice reducer import kiya
-// User authentication aur profile ke state ko manage karta hai
+
+// ================= SLICE REDUCERS =================
+
+// Ye reducers app ke different parts ka state manage karte hain
+
+// User authentication and profile state
 import userReducer from "./slice/userSlice";
+
+// Shopping cart state
 import cartReducer from "./slice/cartSlice";
+
+// Wishlist state
 import wishlistReducer from "./slice/wishlistSlice";
+
+// Checkout state
 import checkoutReducer from "./slice/checkoutSlice";
 
-// ✅ RTK Query API slice import kiya
-// Isme sab API endpoints aur auto-generated hooks hote hain
+
+// ================= RTK QUERY API SLICE =================
+
+// Isme sab API endpoints defined hain
+// Ye automatically caching, refetching, and hooks generate karta hai
 import { api } from "./api";
-
-// ⚠️ Ye line actually zarurat nahi hai - koi use nahi ho raha
-// You can safely delete it if you want
-import { set } from "react-hook-form";
+import { adminApi } from "./adminApi";
 
 
-// ✅ redux-persist ke liye configuration banaya
-// Batata hai ki user slice ka kaunsa data persist hoga
+// ================= PERSIST CONFIGURATION =================
+
+// persistConfig define karta hai ki kaunsa state localStorage me save hoga
+
+
+// USER PERSIST CONFIG
 const userPersistConfig = {
-  key: 'user',            // localStorage mein is key se save hoga
-  storage,                // Storage backend (localStorage)
-  whiteList: [            // sirf in fields ko save karna hai
+  key: 'user',         // localStorage key name
+  storage,             // storage engine (localStorage)
+
+  // whitelist = sirf ye fields persist hongi
+  whitelist: [
     'user',
     'isEmailVerified',
     'isLoggedIn'
   ]
-}
+};
 
+
+// CART PERSIST CONFIG
 const cartPersistConfig = {
-  key: 'cart',            // localStorage mein is key se save hoga
-  storage,                // Storage backend (localStorage)
-  whiteList: [            // sirf in fields ko save karna hai
+  key: 'cart',
+  storage,
+
+  // sirf cart items persist honge
+  whitelist: [
     'items'
   ]
-}
+};
 
 
+// WISHLIST PERSIST CONFIG
 const wishlistPersistConfig = {
   key: 'wishlist',
   storage
-}
+};
 
 
+// CHECKOUT PERSIST CONFIG
 const checkoutPersistConfig = {
   key: 'checkout',
   storage
-}
+};
+
+
+// ================= CREATE PERSISTED REDUCERS =================
+
+// persistReducer reducer ko wrap karta hai
+// Ye automatically state ko:
+// - localStorage me save karega
+// - refresh ke baad restore karega
+
+const persistedUserReducer =
+  persistReducer(userPersistConfig, userReducer);
+
+const persistedCartReducer =
+  persistReducer(cartPersistConfig, cartReducer);
+
+const persistedWishlistReducer =
+  persistReducer(wishlistPersistConfig, wishlistReducer);
+
+const persistedCheckoutReducer =
+  persistReducer(checkoutPersistConfig, checkoutReducer);
 
 
 
+// ================= CREATE REDUX STORE =================
 
-
-// ✅ userReducer ko persistReducer ke saath wrap kiya
-// Ye user slice ko automatically localStorage mein save/rehydrate karega
-const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
-const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
-const persistedWishlistReducer = persistReducer(wishlistPersistConfig, wishlistReducer);
-const persistedCheckoutReducer = persistReducer(checkoutPersistConfig, checkoutReducer);
-
-
-// ✅ Redux Store banaya
 export const store = configureStore({
-  reducer: {
-    // ✅ RTK Query ke reducer ko store mein add kiya
-    [api.reducerPath]: api.reducer,       // e.g. "api": RTK Query state
 
-    // ✅ User slice with persistence
-    user: persistedUserReducer,       // e.g. "user": Auth data, saved in storage
-    cart: persistedCartReducer,       // e.g. "cart": Cart data, saved in storage
-    wishlist: persistedWishlistReducer, // e.g. "wishlist": Wishlist data, saved in storage
-    checkout: persistedCheckoutReducer // e.g. "checkout": Checkout data, saved in storage
+  reducer: {
+
+    // RTK Query reducer
+    // Ye cache, queries, mutations store karta hai
+    [api.reducerPath]: api.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
+
+
+    // Persisted reducers
+    user: persistedUserReducer,
+    cart: persistedCartReducer,
+    wishlist: persistedWishlistReducer,
+    checkout: persistedCheckoutReducer
   },
 
-  // ✅ Middleware setup
-  // getDefaultMiddleware mein persist ke actions ignore kiye
-  // RTK Query ka middleware bhi add kiya
+
+  // ================= MIDDLEWARE =================
+
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
+
+      // redux-persist actions ignore kiye gaye
+      // kyuki ye non-serializable values use karte hain
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER
+        ],
       },
-    }).concat(api.middleware),            // RTK Query features (caching, invalidation, polling)
+
+    }).concat(api.middleware) 
+    .concat(adminApi.middleware) // RTK Query middleware add kiya
+    // Ye handle karta hai:
+    // - caching
+    // - invalidation
+    // - refetch
+    // - polling
 });
 
 
-// ✅ SetupListeners call kiya
-// RTK Query ke auto-refetch on focus/reconnect ke liye
+
+// ================= RTK QUERY LISTENERS =================
+
+// Ye enable karta hai automatic refetch jab:
+// - tab focus hota hai
+// - internet reconnect hota hai
 setupListeners(store.dispatch);
 
 
-// ✅ Persistor banaya
-// Redux Persist ke liye store ka persistor object
-// Ye localStorage se state restore karega
+
+// ================= CREATE PERSISTOR =================
+
+// persistor redux-persist ka controller hai
+// Ye manage karta hai:
+// - state save karna
+// - state restore karna
+
 export const persistor = persistStore(store);
 
 
-// ✅ Redux state aur dispatch ke TypeScript types define kiye
-// Type-safe hooks banane ke liye use hote hain
-export type RootState = ReturnType<typeof store.getState>;   // store.getState() ka return type
-export type AppDispatch = typeof store.dispatch;             // store.dispatch ka type
+
+// ================= TYPESCRIPT TYPES =================
+
+// RootState = Redux store ka complete state type
+// Isse type-safe selectors ban sakte hain
+
+export type RootState =
+  ReturnType<typeof store.getState>;
+
+
+// AppDispatch = dispatch function ka type
+// Isse type-safe dispatch possible hota hai
+
+export type AppDispatch =
+  typeof store.dispatch;

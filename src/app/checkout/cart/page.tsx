@@ -74,6 +74,12 @@ const page = () => {
   );
   const [createRazorpayPayment] = useCreateRazorpayPaymentMutation();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  
+    useEffect(()=>{
+      if(user && user.role !== "user"){
+        router.push('/admin');
+      }
+    },[ user, router]);
 
   useEffect(() => {
     if (orderData && orderData.shippingAddress) {

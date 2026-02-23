@@ -37,7 +37,7 @@ export default function AuthCheck({children}:{children: React.ReactNode}){
             }
         }
 
-        if(!user && isLoggedIn){
+        if(!user){
             checkAuth();
         }
         else{

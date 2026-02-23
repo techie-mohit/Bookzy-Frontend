@@ -34,6 +34,14 @@ const page = () => {
   const [addToWishlistMutation] = useAddToWishlistMutation();
   const [removeWishlistMutation] = useRemoveFromWishlistMutation();
   const wishlist = useSelector((state: RootState) => state.wishlist.items);
+  
+  const user = useSelector((state:RootState) => state.user.user);
+
+  useEffect(()=>{
+    if(user && user.role !== "user"){
+      router.push('/admin');
+    }
+  },[ user, router]);
 
 
   useEffect(()=>{
@@ -288,6 +296,7 @@ const page = () => {
 
 
           {/* Book Seller Details */}
+          {book.seller && (
           <Card className="border-none shadow-md">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Sold By</CardTitle>
@@ -308,14 +317,13 @@ const page = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4"/>
-                    {/* <span>
+                    <span>
                       {
-                        book.seller?.addresses?.[0].city?
-                        `${book.seller?.addresses?.[0].city}, ${book.seller?.addresses?.[0].state}`
+                        book.seller.addresses?.[0]?.city
+                        ? `${book.seller.addresses[0].city}, ${book.seller.addresses[0].state}`
                         : "Location Not Specified"
                       }
-                    </span> */}
-                    <span>Varansi</span>
+                    </span>
                   </div>
                   </div>
                 </div>
@@ -331,6 +339,7 @@ const page = () => {
               
             </CardContent>
           </Card>
+          )}
 
         </div>
       </div>

@@ -5,7 +5,7 @@ import { useAddProductsMutation } from "@/store/api";
 import { toggleLoginDialog } from "@/store/slice/userSlice";
 import { RootState } from "@/store/store";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -66,6 +66,13 @@ const page = () => {
     control,
     formState: { errors },
   } = useForm<BookDetails>({ defaultValues: { images: [] } });
+
+  
+    useEffect(()=>{
+      if(user && user.role !== "user"){
+        router.push('/admin');
+      }
+    },[ user, router]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

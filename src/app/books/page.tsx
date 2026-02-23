@@ -30,6 +30,8 @@ import NoData from "../components/NoData";
 import { useRouter } from "next/navigation";
 import { useGetProductsQuery } from "@/store/api";
 import { BookDetails } from "@/lib/types/type";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,6 +41,15 @@ const Page = () => {
   const [sortOption, setSortOption] = useState("newest");
 
   const router = useRouter();
+
+  
+    const user = useSelector((state:RootState) => state.user.user);
+  
+    useEffect(()=>{
+      if(user && user.role !== "user"){
+        router.push('/admin');
+      }
+    },[ user, router]);
 
   const bookPerPage = 6; // Number of books to display per page
 

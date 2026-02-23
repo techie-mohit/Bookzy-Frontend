@@ -12,7 +12,7 @@ export interface BookDetails{
     description?: string;
     finalPrice:number;
     shippingCharge:string;
-    seller:UserData;
+    seller:UserData | null;
     paymentMode:"UPI" | "Bank Account";
     paymentDetails: {
         upiId?:string;

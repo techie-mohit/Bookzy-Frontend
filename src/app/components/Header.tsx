@@ -81,7 +81,6 @@ const Header = () => {
   const handleProtectionClick = (href: string) => {
     if (user) {
       router.push(href);
-      setIsDropdownOpen(false);
     } else {
       dispatch(toggleLoginDialog());
       setIsDropdownOpen(false);
@@ -93,12 +92,14 @@ const Header = () => {
       await logoutMutation({}).unwrap();
       dispatch(logout());
       toast.success("Logout successful");
+      router.push('/');
       setIsDropdownOpen(false);
 
     }catch(error){
       toast.error("Logout failed. Please try again.");
     }
   };
+
 
   const menuItems = [
     ...(user && user

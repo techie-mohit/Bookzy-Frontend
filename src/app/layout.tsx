@@ -26,9 +26,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={robotoMono.className}>
         <LayoutWrapper>
-          <Header />
+      
           <main>{children}</main>
-          <Footer />
+
         </LayoutWrapper>
       </body>
     </html>

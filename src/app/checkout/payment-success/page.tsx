@@ -76,7 +76,7 @@ const page = () => {
 
                             <div className='bg-green-50 p-4 rounded-lg'>
                                 <h4 className="font-semibold text-green-700 mb-2">Order Status</h4>
-                                <div className="flex items-center text-green-600"><Package className='w-5 h-5 mr-2' /><span className='font-medium text-xs'> {status.toUpperCase()}</span></div>
+                                <div className="flex items-center text-green-600"><Package className='w-5 h-5 mr-2' /><span className='font-medium text-xs'> {status?.toUpperCase() || "PENDING"}</span></div>
                             </div>
                         </div>
 
