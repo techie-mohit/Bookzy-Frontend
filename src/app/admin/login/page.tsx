@@ -21,11 +21,6 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
-interface LoginProps {
-  isLoginOpen: boolean;
-  setIsLoginOpen: (open: boolean) => void;
-}
-
 interface LoginFormData {
   email: string;
   password: string;
@@ -42,7 +37,7 @@ interface ForgotPasswordFormData {
   email: string;
 }
 
-const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
+const AuthPage = () => {
 
 
   const [currentTab, setCurrentTab] = React.useState<"login" | "signup" | "forgot">("login");
@@ -129,7 +124,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
 
   return (
     <div className ="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-100 to-indigo-100 p-4">
-        <div className="w-full max-w-md bh-white rounded-xl shadow-xl overflow-hidden">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-6 text-white text-center">
                 <h1 className="text-2xl font-bold">
                     BookKart Admin Portal
